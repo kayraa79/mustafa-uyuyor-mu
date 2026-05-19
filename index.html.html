@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mustafa Döngüsü - Manisa Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bg-slideshow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1.5s ease-in-out;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(241, 245, 249, 0.85);
+            z-index: -1;
+            transition: background 0.5s ease;
+        }
+
+        body.sleeping-bg .bg-overlay {
+            background: rgba(236, 253, 245, 0.85);
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 45px 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            max-width: 480px;
+            width: 100%;
+            backdrop-filter: blur(8px);
+            transition: all 0.5s ease;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.05rem;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 35px;
+        }
+
+        .timer-box {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 25px;
+            color: #4f46e5;
+            transition: color 0.5s ease;
+        }
+
+        .sleeping .timer-box {
+            color: #059669;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 999px;
+            margin-bottom: 35px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6366f1, #4f46e5);
+            border-radius: 999px;
+            transition: width 1s linear, background 0.5s ease;
+        }
+
+        .sleeping .progress-bar {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            transition: all 0.5s ease;
+        }
+
+        .status-awake {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .status-sleep {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .istanbul-time {
+            margin-top: 35px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        
+        #local-clock {
+            font-weight: 700;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-slideshow" id="slideshow"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="container" id="main-card">
+        <h1>Mustafa Döngüsü</h1>
+        <div class="subtitle" id="label">Zaman hesaplanıyor...</div>
+        
+        <div class="timer-box" id="countdown">00:00:00</div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <div class="status-badge" id="status">Kontrol ediliyor...</div>
+        
+        <div class="istanbul-time">İstanbul Saati: <span id="local-clock">00:00:00</span></div>
+    </div>
+
+    <script>
+        const manisaImages = [
+            "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+            "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+            "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1200&q=80",
+            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80"
+        ];
+
+        let currentImgIndex = 0;
+        const slideshowElem = document.getElementById('slideshow');
+
+        function changeBackground() {
+            slideshowElem.style.backgroundImage = `url('${manisaImages[currentImgIndex]}')`;
+            currentImgIndex = (currentImgIndex + 1) % manisaImages.length;
+        }
+        
+        changeBackground();
+        setInterval(changeBackground, 6000);
+
+        function getIstanbulTime() {
+            const now = new Date();
+            const istanbulString = now.toLocaleString("en-US", {timeZone: "Europe/Istanbul"});
+            return new Date(istanbulString);
+        }
+
+        function updateTimers() {
+            const now = getIstanbulTime();
+            
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            document.getElementById('local-clock').innerText = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            const currentSeconds = (hours * 3600) + (minutes * 60) + seconds;
+            
+            const bedTimeSeconds = (23 * 3600) + (7 * 60); 
+            const wakeTimeSeconds = (6 * 3600);           
+            const daySeconds = 24 * 3600;
+
+            let targetSeconds = 0;
+            let totalPeriodSeconds = 0;
+            let isSleeping = false;
+
+            if (currentSeconds >= wakeTimeSeconds && currentSeconds < bedTimeSeconds) {
+                targetSeconds = bedTimeSeconds - currentSeconds;
+                totalPeriodSeconds = bedTimeSeconds - wakeTimeSeconds;
+                isSleeping = false;
+            } else {
+                isSleeping = true;
+                totalPeriodSeconds = (daySeconds - bedTimeSeconds) + wakeTimeSeconds;
+                
+                if (currentSeconds >= bedTimeSeconds) {
+                    targetSeconds = (daySeconds - currentSeconds) + wakeTimeSeconds;
+                } else {
+                    targetSeconds = wakeTimeSeconds - currentSeconds;
+                }
+            }
+
+            const h = Math.floor(targetSeconds / 3600);
+            const m = Math.floor((targetSeconds % 3600) / 60);
+            const s = targetSeconds % 60;
+            document.getElementById('countdown').innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+            const elapsedSeconds = totalPeriodSeconds - targetSeconds;
+            const progressPercent = (elapsedSeconds / totalPeriodSeconds) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            const body = document.body;
+            const card = document.getElementById('main-card');
+            const label = document.getElementById('label');
+            const status = document.getElementById('status');
+
+            if (isSleeping) {
+                card.classList.add('sleeping');
+                body.classList.add('sleeping-bg');
+                label.innerText = "Mustafa'nın uyanmasına ne kadar kaldı?";
+                status.innerText = "Durum: Mışıl Mışıl Uyuyor 💤";
+                status.className = "status-badge status-sleep";
+            } else {
+                card.classList.remove('sleeping');
+                body.classList.remove('sleeping-bg');
+                label.innerText = "Mustafa'nın uyumasına ne kadar kaldı?";
+                status.innerText = "Durum: Muhtemelen Esniyor 🥱";
+                status.className = "status-badge status-awake";
+            }
+        }
+
+        setInterval(updateTimers, 1000);
+        updateTimers();
+    </script>
+</body>
+</html>
